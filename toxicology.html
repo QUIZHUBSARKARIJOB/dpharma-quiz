@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>D Pharma Quiz - Set 1 (Basics)</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; max-width: 900px; }
+    h1 { text-align: center; }
+    .question { font-size: 18px; margin: 20px 0; }
+    .options button {
+      display: block; width: 100%; margin: 6px 0; padding: 10px;
+      font-size: 16px; text-align: left; cursor: pointer;
+    }
+    .feedback { margin: 15px 0; font-weight: bold; }
+    .score { margin: 20px 0; font-size: 18px; }
+    .nav button { margin: 5px; padding: 8px 16px; font-size: 16px; }
+  </style>
+</head>
+<body>
+  <h1>D Pharma Quiz - Set 1 (Basics of Pharmacology)</h1>
+  <div class="question" id="question"></div>
+  <div class="options" id="options"></div>
+  <div class="feedback" id="feedback"></div>
+  <div class="score" id="score">Score: 0</div>
+  <div class="nav">
+    <button onclick="prevQuestion()">⬅ Back</button>
+    <button onclick="nextQuestion()">Next ➡</button>
+    <button onclick="endQuiz()">End Quiz</button>
+  </div>
+
+  <script>
+    const qa_bank = [
+      {q:"Pharmacology is the study of:", options:["Diseases","Drugs and their actions","Nutrition","Microorganisms"], answer:"Drugs and their actions"},
+      {q:"Fastest route giving 100% bioavailability:", options:["Oral","Intravenous","Intramuscular","Subcutaneous"], answer:"Intravenous"},
+      {q:"Sublingual nitroglycerin is preferred because it:", options:["Is cheaper","Avoids first-pass metabolism","Acts slower","Is tasteless"], answer:"Avoids first-pass metabolism"},
+      {q:"Main disadvantage of oral route:", options:["Poor patient compliance","First-pass metabolism","Slow onset","It is expensive"], answer:"First-pass metabolism"},
+      {q:"Which factor affects drug absorption most:", options:["pH of medium","Drug color","Drug price","Storage condition"], answer:"pH of medium"},
+      {q:"Bioavailability means:", options:["Fraction of unchanged drug reaching systemic circulation","Drug solubility only","Drug distribution in tissue","Protein binding"], answer:"Fraction of unchanged drug reaching systemic circulation"},
+      {q:"Volume of distribution relates dose to:", options:["Plasma concentration","Half-life","Clearance","Bioavailability"], answer:"Plasma concentration"},
+      {q:"First-order kinetics means:", options:["Constant fraction eliminated per unit time","Constant amount eliminated per unit time","Elimination independent of dose","Zero clearance"], answer:"Constant fraction eliminated per unit time"},
+      {q:"Half-life (t½) depends on:", options:["Clearance & Vd","Protein binding only","Absorption rate only","Bioavailability only"], answer:"Clearance & Vd"},
+      {q:"Which organ is major for drug metabolism:", options:["Liver","Kidney","Lung","Heart"], answer:"Liver"},
+      {q:"Prodrug definition:", options:["Inactive drug converted into active form","Drug causing addiction","Drug with high potency","Drug with low toxicity"], answer:"Inactive drug converted into active form"},
+      {q:"Enzyme induction leads to:", options:["Decreased drug effect","Increased drug toxicity","Decreased metabolism","Enzyme inhibition"], answer:"Decreased drug effect"},
+      {q:"Drug excretion mainly via:", options:["Kidney","Heart","Lung","Spleen"], answer:"Kidney"},
+      {q:"GFR (glomerular filtration rate) is important for:", options:["Renal clearance","Hepatic metabolism","Protein binding","Bioavailability"], answer:"Renal clearance"},
+      {q:"Therapeutic index indicates:", options:["Safety margin","Drug color","Taste","Price"], answer:"Safety margin"},
+      {q:"ED50 means:", options:["Dose producing 50% response","Toxic dose","Lethal dose","Maintenance dose"], answer:"Dose producing 50% response"},
+      {q:"LD50 means:", options:["Dose lethal to 50% animals","Therapeutic dose","Maintenance dose","Safe dose"], answer:"Dose lethal to 50% animals"},
+      {q:"Agonist acts by:", options:["Activating receptor","Blocking receptor","Enzyme inhibition","Protein binding"], answer:"Activating receptor"},
+      {q:"Antagonist acts by:", options:["Blocking receptor","Activating receptor","Protein synthesis","Absorption inhibition"], answer:"Blocking receptor"},
+      {q:"Partial agonist means:", options:["Produces submaximal effect","No effect","Full effect","Inverse effect"], answer:"Produces submaximal effect"},
+      {q:"Inverse agonist produces:", options:["Opposite effect","Same effect","No effect","Maximum effect"], answer:"Opposite effect"},
+      {q:"Competitive antagonist shifts dose-response curve:", options:["To right","To left","Downward","No change"], answer:"To right"},
+      {q:"Non-competitive antagonist shifts curve:", options:["Downward","Upward","Left","Right"], answer:"Downward"},
+      {q:"Tachyphylaxis means:", options:["Rapid loss of effect","Increased effect","Slow absorption","Long half-life"], answer:"Rapid loss of effect"},
+      {q:"Tolerance means:", options:["Reduced response on repeated dose","Increased response","No response","Immediate hypersensitivity"], answer:"Reduced response on repeated dose"},
+      {q:"Placebo effect is:", options:["Psychological response","Pharmacological response","Toxic effect","Idiosyncratic effect"], answer:"Psychological response"},
+      {q:"Idiosyncrasy is:", options:["Unusual response","Normal response","Expected effect","Dose dependent"], answer:"Unusual response"},
+      {q:"Adverse drug reaction is:", options:["Harmful unintended response","Desired response","Placebo response","Therapeutic effect"], answer:"Harmful unintended response"},
+      {q:"Pharmacovigilance deals with:", options:["Monitoring adverse drug reactions","Drug synthesis","Drug design","Drug absorption"], answer:"Monitoring adverse drug reactions"},
+      {q:"Drugs classified pharmacologically by:", options:["Mechanism of action","Alphabetical order","Color","Taste"], answer:"Mechanism of action"},
+      {q:"Drugs acting on CNS include:", options:["Anaesthetics, analgesics","Antacids","Diuretics","Laxatives"], answer:"Anaesthetics, analgesics"},
+      {q:"Local anaesthetics act by blocking:", options:["Na+ channels","K+ channels","Ca2+ channels","Cl- channels"], answer:"Na+ channels"},
+      {q:"General anaesthetics act mainly on:", options:["CNS","Heart","Kidney","Liver"], answer:"CNS"},
+      {q:"Sedatives and hypnotics are used for:", options:["Sleep & anxiety","Ulcer","Hypertension","Asthma"], answer:"Sleep & anxiety"},
+      {q:"Antipyretics reduce:", options:["Fever","Pain","Anxiety","Inflammation"], answer:"Fever"},
+      {q:"Analgesics relieve:", options:["Pain","Sleep","Fever","Cough"], answer:"Pain"},
+      {q:"Anticonvulsants treat:", options:["Epilepsy","Asthma","Ulcer","Hypertension"], answer:"Epilepsy"},
+      {q:"Autonomic drugs include:", options:["Sympathomimetics & parasympathomimetics","Diuretics","Antacids","Laxatives"], answer:"Sympathomimetics & parasympathomimetics"},
+      {q:"Drugs acting on eye include:", options:["Mydriatics & miotics","Antacids","Diuretics","Antipyretics"], answer:"Mydriatics & miotics"},
+      {q:"Drugs acting on respiratory system include:", options:["Bronchodilators","Analgesics","Diuretics","Hypnotics"], answer:"Bronchodilators"},
+      {q:"Antacids are used for:", options:["Hyperacidity","Pain","Fever","Asthma"], answer:"Hyperacidity"},
+      {q:"Cardiovascular drugs include:", options:["Antihypertensives","Laxatives","Antacids","Hypnotics"], answer:"Antihypertensives"},
+      {q:"Antiplatelet drug example:", options:["Aspirin","Ibuprofen","Ranitidine","Diazepam"], answer:"Aspirin"},
+      {q:"Diuretics act on:", options:["Kidney","Liver","Lung","Heart"], answer:"Kidney"},
+      {q:"Hormones are secreted by:", options:["Endocrine glands","Exocrine glands","Kidney","Liver"], answer:"Endocrine glands"},
+      {q:"Insulin lowers:", options:["Blood glucose","Blood pressure","Pain","Fever"], answer:"Blood glucose"},
+      {q:"Thyroxine is hormone of:", options:["Thyroid gland","Adrenal gland","Pituitary gland","Pancreas"], answer:"Thyroid gland"},
+      {q:"Corticosteroids secreted by:", options:["Adrenal cortex","Adrenal medulla","Thyroid","Pituitary"], answer:"Adrenal cortex"},
+      {q:"Drugs acting on digestive system include:", options:["Laxatives & antacids","Analgesics","Sedatives","Anticonvulsants"], answer:"Laxatives & antacids"},
+      // 👉 continue like this up to 100 questions
+    ];
+
+    let index = 0, score = 0, answered = false;
+
+    function loadQuestion() {
+      let q = qa_bank[index];
+      document.getElementById("question").innerText = `Q${index+1}: ${q.q}`;
+      let options = [...q.options];
+      options.sort(() => Math.random() - 0.5); // shuffle
+      let optHTML = options.map(opt =>
+        `<button onclick="checkAnswer('${opt}')">${opt}</button>`
+      ).join("");
+      document.getElementById("options").innerHTML = optHTML;
+      document.getElementById("feedback").innerText = "";
+      answered = false;
+    }
+
+    function checkAnswer(choice) {
+      if (answered) return;
+      let correct = qa_bank[index].answer;
+      if (choice === correct) {
+        document.getElementById("feedback").innerText = "✅ Correct!";
+        score++;
+      } else {
+        document.getElementById("feedback").innerText = "❌ Wrong! Correct: " + correct;
+      }
+      document.getElementById("score").innerText = "Score: " + score;
+      answered = true;
+    }
+
+    function nextQuestion() {
+      if (index < qa_bank.length-1) {
+        index++;
+        loadQuestion();
+      }
+    }
+
+    function prevQuestion() {
+      if (index > 0) {
+        index--;
+        loadQuestion();
+      }
+    }
+
+    function endQuiz() {
+      alert(`🎯 Final Score: ${score}/${qa_bank.length}`);
+    }
+
+    loadQuestion();
+  </script>
+</body>
+</html>
